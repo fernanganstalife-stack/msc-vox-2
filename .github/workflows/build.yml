@@ -1,0 +1,39 @@
+
+name: Build MSC VOXITY VST3
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure CMake
+        run: cmake -S . -B build -A x64 -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compile VST3
+        run: cmake --build build --config Release --parallel
+
+      - name: Find and package VST3
+        shell: pwsh
+        run: |
+          $plugin = Get-ChildItem -Path build -Filter "*.vst3" -Directory -Recurse | Select-Object -First 1
+          if (-not $plugin) {
+            throw "No se encontro ningun archivo .vst3. Revisa el CMakeLists.txt."
+          }
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item -Path $plugin.FullName -Destination dist -Recurse
+
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: MSC-VOXITY-VST3
+          path: dist/
