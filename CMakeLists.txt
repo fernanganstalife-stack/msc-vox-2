@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.22)
 
 project(MSC_VOXITY_V2 VERSION 2.0.0 LANGUAGES CXX C)
@@ -5,8 +6,12 @@ project(MSC_VOXITY_V2 VERSION 2.0.0 LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add JUCE
-find_package(JUCE CONFIG REQUIRED)
+# Load JUCE directly from the downloaded source
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/CMakeLists.txt")
+    message(FATAL_ERROR "JUCE source folder not found!")
+endif()
+
+add_subdirectory(JUCE)
 
 juce_add_plugin(MSC_VOXITY_V2
     COMPANY_NAME "MySpaceCore Audio"
@@ -49,7 +54,6 @@ target_link_libraries(MSC_VOXITY_V2 PRIVATE
     juce::juce_gui_graphics
     juce::juce_dsp
     juce::juce_core
-    PUBLIC
     juce::juce_recommended_config_flags
     juce::juce_recommended_warning_flags
 )
